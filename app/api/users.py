@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from flask import request, url_for, abort
+from flask import request, url_for, abort, jsonify
 from app import db
 from app.models import User
 from app.api import bp
@@ -87,23 +87,23 @@ def get_current_user():
     """現在のユーザー情報を取得"""
     return token_auth.current_user().to_dict()
 
-@bp.route('/users/me', methods=['PUT'])
+
+@bp.route('/users/about_me', methods=['PUT'])
 @token_auth.login_required
-def update_current_user():
-    """現在のユーザー情報を更新"""
+def update_about_me():
     user = token_auth.current_user()
     data = request.get_json() or {}
     
-    # username と email のチェックは既存のロジックを再利用
-    if 'username' in data and data['username'] != user.username and \
-        db.session.scalar(sa.select(User).where(
-            User.username == data['username'])):
-        return bad_request('please use a different username')
-    if 'email' in data and data['email'] != user.email and \
-        db.session.scalar(sa.select(User).where(
-            User.email == data['email'])):
-        return bad_request('please use a different email address')
+    if 'about_me' not in data:
+        return bad_request('about_me field is required')
     
-    user.from_dict(data, new_user=False)
+    user.about_me = data['about_me']
     db.session.commit()
-    return user.to_dict()
+    return jsonify(user.to_dict()), 200
+
+
+@bp.route('/verify_token', methods=['GET'])
+@token_auth.login_required
+def verify_token():
+    """验证当前令牌是否有效"""
+    return jsonify({'valid': True}), 200

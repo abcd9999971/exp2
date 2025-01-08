@@ -28,6 +28,7 @@ class MicroblogClient:
 
     def save_token(self, token_data):
         """トークンを保存する"""
+        print("Saving token:", token_data)  # test
         with open(self.token_file, 'w') as f:
             json.dump(token_data, f)
         self.access_token = token_data['access_token']
@@ -94,6 +95,7 @@ class MicroblogClient:
     def ensure_authenticated(self):
         """認証が必要な場合は認証フローを実行"""
         if not self.access_token or not self.verify_token():
+            print("Token is invalid or not present. Initiating authentication flow.")
             if not self.device_auth_flow():
                 sys.exit(1)
 
@@ -102,18 +104,27 @@ class MicroblogClient:
         if not self.access_token:
             return False
         
-        response = requests.get(
-            urljoin(self.config['api_base_url'], '/api/verify_token'),
-            headers=self.get_headers()
-        )
-        return response.status_code == 200
+        try:
+            response = requests.get(
+                urljoin(self.config['api_base_url'], '/api/verify_token'),
+                headers=self.get_headers()
+            )
+            
+            # test
+            print(f"Token verification status: {response.status_code}")
+            print(f"Token verification response: {response.text}")
+            
+            return response.status_code == 200
+        except Exception as e:
+            print(f"Token verification error: {e}")
+            return False
 
     def get_about_me(self):
         """ユーザーのabout_me情報を取得"""
         self.ensure_authenticated()
         
         response = requests.get(
-            urljoin(self.config['api_base_url'], '/api/users/me'),
+            urljoin(self.config['api_base_url'], '/api/users/me'),  # 修改這裡的路由
             headers={'Authorization': f'Bearer {self.access_token}'}
         )
         
@@ -132,7 +143,7 @@ class MicroblogClient:
         self.ensure_authenticated()
         
         response = requests.put(
-            urljoin(self.config['api_base_url'], '/api/user/about_me'),
+            urljoin(self.config['api_base_url'], '/api/users/about_me'),  # 修改這裡的路由
             headers=self.get_headers(),
             json={'about_me': new_text}
         )
