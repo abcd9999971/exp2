@@ -22,3 +22,6 @@ class Config:
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     POSTS_PER_PAGE = 25
+
+    # OAuth クライアントIDを追加
+    OAUTH_CLIENT_ID = 'test-client'

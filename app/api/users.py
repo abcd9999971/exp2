@@ -79,3 +79,31 @@ def update_user(id):
     user.from_dict(data, new_user=False)
     db.session.commit()
     return user.to_dict()
+
+
+@bp.route('/users/me', methods=['GET'])
+@token_auth.login_required
+def get_current_user():
+    """現在のユーザー情報を取得"""
+    return token_auth.current_user().to_dict()
+
+@bp.route('/users/me', methods=['PUT'])
+@token_auth.login_required
+def update_current_user():
+    """現在のユーザー情報を更新"""
+    user = token_auth.current_user()
+    data = request.get_json() or {}
+    
+    # username と email のチェックは既存のロジックを再利用
+    if 'username' in data and data['username'] != user.username and \
+        db.session.scalar(sa.select(User).where(
+            User.username == data['username'])):
+        return bad_request('please use a different username')
+    if 'email' in data and data['email'] != user.email and \
+        db.session.scalar(sa.select(User).where(
+            User.email == data['email'])):
+        return bad_request('please use a different email address')
+    
+    user.from_dict(data, new_user=False)
+    db.session.commit()
+    return user.to_dict()

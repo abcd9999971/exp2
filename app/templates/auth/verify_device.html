@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% import "bootstrap_wtf.html" as wtf %}
+
+{% block content %}
+    <h1>{{ _('Verify Device') }}</h1>
+    {{ wtf.quick_form(form) }}
+    <p>{{ _('Enter the code shown in your application to authorize access.') }}</p>
+{% endblock %}

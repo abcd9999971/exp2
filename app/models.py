@@ -354,3 +354,29 @@ class Task(db.Model):
     def get_progress(self):
         job = self.get_rq_job()
         return job.meta.get('progress', 0) if job is not None else 100
+
+
+class DeviceCode(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    device_code: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+                                                  unique=True)
+    user_code: so.Mapped[str] = so.mapped_column(sa.String(8), index=True,
+                                                unique=True)
+    user_id: so.Mapped[Optional[int]] = so.mapped_column(sa.ForeignKey('user.id'))
+    expires_at: so.Mapped[datetime] = so.mapped_column(
+        default=lambda: datetime.now(timezone.utc) + timedelta(minutes=10))
+
+    user: so.Mapped[Optional[User]] = so.relationship()
+
+    def __repr__(self):
+        return f'<DeviceCode {self.user_code}>'
+
+    @staticmethod
+    def clean_expired():
+        """期限切れのデバイスコードを削除"""
+        db.session.execute(
+            sa.delete(DeviceCode).where(
+                DeviceCode.expires_at < datetime.now(timezone.utc)
+            )
+        )
+        db.session.commit()

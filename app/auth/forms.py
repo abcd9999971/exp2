@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_babel import _, lazy_gettext as _l
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 import sqlalchemy as sa
 from app import db
 from app.models import User
@@ -47,3 +47,15 @@ class ResetPasswordForm(FlaskForm):
         _l('Repeat Password'), validators=[DataRequired(),
                                            EqualTo('password')])
     submit = SubmitField(_l('Request Password Reset'))
+
+
+class DeviceAuthForm(FlaskForm):
+    user_code = StringField(_l('Device Code'), validators=[
+        DataRequired(),
+        Length(min=8, max=8)  # デバイスコードは8文字固定
+    ])
+    submit = SubmitField(_l('Verify Device'))
+
+    def validate_user_code(self, user_code):
+        # 入力されたコードを大文字に変換（表示用）
+        user_code.data = user_code.data.upper()
