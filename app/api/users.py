@@ -105,5 +105,4 @@ def update_about_me():
 @bp.route('/verify_token', methods=['GET'])
 @token_auth.login_required
 def verify_token():
-    """验证当前令牌是否有效"""
     return jsonify({'valid': True}), 200

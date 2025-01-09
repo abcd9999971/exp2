@@ -124,7 +124,7 @@ class MicroblogClient:
         self.ensure_authenticated()
         
         response = requests.get(
-            urljoin(self.config['api_base_url'], '/api/users/me'),  # 修改這裡的路由
+            urljoin(self.config['api_base_url'], '/api/users/me'),  
             headers={'Authorization': f'Bearer {self.access_token}'}
         )
         
@@ -143,7 +143,7 @@ class MicroblogClient:
         self.ensure_authenticated()
         
         response = requests.put(
-            urljoin(self.config['api_base_url'], '/api/users/about_me'),  # 修改這裡的路由
+            urljoin(self.config['api_base_url'], '/api/users/about_me'),  
             headers=self.get_headers(),
             json={'about_me': new_text}
         )
