@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "target": "es6",
+        "module": "commonjs",
+        "strict": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": ["node_modules/*"]
+        }
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

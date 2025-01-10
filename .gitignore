@@ -38,3 +38,11 @@ nosetests.xml
 venv
 app.db
 microblog.log*
+
+
+#node
+
+node_modules
+
+package-lock.json
+
