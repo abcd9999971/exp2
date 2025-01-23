@@ -25,3 +25,4 @@ class Config:
 
     # OAuth クライアントIDを追加
     OAUTH_CLIENT_ID = 'test-client'
+    

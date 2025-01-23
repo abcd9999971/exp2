@@ -380,3 +380,32 @@ class DeviceCode(db.Model):
             )
         )
         db.session.commit()
+
+class AuthorizationCode(db.Model):
+   id: so.Mapped[int] = so.mapped_column(primary_key=True)
+   code: so.Mapped[str] = so.mapped_column(sa.String(64), index=True, unique=True)  
+   client_id: so.Mapped[str] = so.mapped_column(sa.String(40))
+   user_id: so.Mapped[Optional[int]] = so.mapped_column(sa.ForeignKey('user.id'))
+   expires_at: so.Mapped[datetime] = so.mapped_column(
+       default=lambda: datetime.now(timezone.utc) + timedelta(minutes=10))
+   redirect_uri: so.Mapped[str] = so.mapped_column(sa.String(255))
+   
+   user: so.Mapped[Optional[User]] = so.relationship()
+
+   def __repr__(self):
+       return f'<AuthorizationCode {self.code}>'
+
+   @staticmethod 
+   def clean_expired():
+       db.session.execute(
+           sa.delete(AuthorizationCode).where(
+               AuthorizationCode.expires_at < datetime.now(timezone.utc)
+           )
+       )
+       db.session.commit()
+
+class Client(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    client_id: so.Mapped[str] = so.mapped_column(sa.String(64), unique=True)
+    client_secret: so.Mapped[str] = so.mapped_column(sa.String(64))
+    redirect_uri: so.Mapped[str] = so.mapped_column(sa.String(255))

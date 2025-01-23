@@ -239,3 +239,25 @@ def notifications():
         'data': n.get_data(),
         'timestamp': n.timestamp
     } for n in notifications]
+
+"""
+# OAuth client registration
+@bp.route('/oauth/register', methods=['POST'])
+def register_client():
+    client_id = secrets.token_urlsafe(32)
+    client_secret = secrets.token_urlsafe(32)
+    redirect_uri = request.form.get('redirect_uri')
+    
+    client = Client(
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri
+    )
+    db.session.add(client)
+    db.session.commit()
+    
+    return jsonify({
+        'client_id': client_id,
+        'client_secret': client_secret
+    })  
+"""  

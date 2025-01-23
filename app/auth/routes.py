@@ -3,14 +3,15 @@ from urllib.parse import urlsplit
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_babel import _
 import sqlalchemy as sa
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, \
     ResetPasswordRequestForm, ResetPasswordForm, DeviceAuthForm
-from app.models import User, DeviceCode
+from app.models import User, DeviceCode, AuthorizationCode
 from app.auth.email import send_password_reset_email
+
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -140,11 +141,16 @@ def verify_device():
 
 @bp.route('/oauth/token', methods=['POST'])
 def token():
-    """アクセストークンを発行するエンドポイント"""
     grant_type = request.form.get('grant_type')
-    if grant_type != 'urn:ietf:params:oauth:grant-type:device_code':
-        return jsonify({'error': 'unsupported_grant_type'}), 400
+    
+    if grant_type == 'urn:ietf:params:oauth:grant-type:device_code':
+        return handle_device_token()
+    elif grant_type == 'authorization_code':
+        return handle_auth_code_token()
+    
+    return jsonify({'error': 'unsupported_grant_type'}), 400
 
+def handle_device_token():
     device_code = request.form.get('device_code')
     device = db.session.scalar(
         sa.select(DeviceCode).where(
@@ -174,3 +180,82 @@ def token():
         'token_type': 'Bearer',
         'expires_in': 3600
     })
+
+def handle_auth_code_token():
+    code = request.form.get('code')
+    client_id = request.form.get('client_id')
+    
+    auth_code = db.session.scalar(
+        sa.select(AuthorizationCode).where(
+            sa.and_(
+                AuthorizationCode.code == code,
+                AuthorizationCode.client_id == client_id,
+                AuthorizationCode.expires_at > datetime.now(timezone.utc)
+            )
+        )
+    )
+    
+    if not auth_code:
+        return jsonify({'error': 'invalid_grant'}), 400
+        
+    user = auth_code.user
+    token = user.get_token()
+    
+    db.session.delete(auth_code)
+    db.session.commit()
+    
+    return jsonify({
+        'access_token': token,
+        'token_type': 'Bearer',
+        'expires_in': 3600
+    })
+
+@bp.route('/oauth/authorize', methods=['GET', 'POST'])
+@login_required
+def authorize():
+    client_id = request.args.get('client_id')
+    redirect_uri = request.args.get('redirect_uri')
+    
+    if request.method == 'GET':
+        return render_template('auth/authorize.html',
+                             client_id=client_id,
+                             redirect_uri=redirect_uri)
+    
+    code = secrets.token_urlsafe(32)
+    auth_code = AuthorizationCode(
+        code=code,
+        client_id=client_id,
+        user_id=current_user.id,
+        redirect_uri=redirect_uri
+    )
+    db.session.add(auth_code)
+    db.session.commit()
+    
+    return redirect(f"{redirect_uri}?code={code}")
+    
+@bp.route('/oauth_callback')
+def oauth_callback():
+    code = request.args.get('code')
+    access_token = request.args.get('access_token')
+
+    if code:
+        auth_code = AuthorizationCode.query.filter_by(code=code).first()
+        if not auth_code:
+            return 'Invalid code', 400
+        
+        user = auth_code.user
+        token = user.get_token()
+        
+        db.session.delete(auth_code)
+        db.session.commit()
+        
+        return render_template('oauth_callback.html', user=user)
+    
+    elif access_token:
+        user = User.query.filter_by(token=access_token).first()
+        if not user:
+            return 'Invalid token', 400
+        
+        return render_template('oauth_callback.html', user=user)
+    
+    return 'Authorization failed', 400
