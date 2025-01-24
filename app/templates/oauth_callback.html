@@ -1,10 +1,94 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>ログイン結果</title>
+   <style>
+       body {
+           margin: 0;
+           padding: 0;
+           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+       }
+       
+       .container {
+           background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+           min-height: 100vh;
+           padding: 2rem;
+       }
+       
+       .btn-allow {
+           background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+           color: white;
+           font-size: 1.5rem;
+           padding: 20px 40px;
+           border: none;
+           border-radius: 15px;
+           font-weight: bold;
+           width: 200px;
+           transition: all 0.3s ease;
+           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+           transform: translateY(0);
+           cursor: pointer;
+       }
+       
+       .btn-allow:hover {
+           background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+           transform: translateY(-2px);
+           box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+       }
 
-{% block content %}
-<div class="container">
-    <h2>User info</h2>
-    <p>Name: {{ user.username }}</p>
-    <p>Mail</p>: {{ user.email }}</p>
-    <p>Profile</p>: {{ user.about_me }}</p>
-</div>
-{% endblock %}
+       .content-card {
+           background: rgba(255, 255, 255, 0.95);
+           backdrop-filter: blur(10px);
+           border-radius: 1rem;
+           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+           padding: 2rem;
+           max-width: 800px;
+           margin: 0 auto;
+       }
+
+       .title {
+           font-size: 2.5rem;
+           font-weight: bold;
+           margin-bottom: 2rem;
+           color: #111827;
+       }
+
+       .subtitle {
+           font-size: 1.5rem;
+           margin-bottom: 1.5rem;
+           color: #374151;
+       }
+
+       .user-info {
+           background-color: #f3f4f6;
+           border-radius: 0.75rem;
+           padding: 1.5rem;
+           margin-bottom: 2rem;
+       }
+
+       .button-container {
+           text-align: center;
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="content-card">
+           <h2 class="title">ログイン結果</h2>
+           <div class="user-info">
+               <p class="subtitle">ユーザー名：{{ user.username }}</p>
+               <p class="subtitle">メールアドレス：{{ user.email }}</p>
+               <p class="subtitle">プロフィール：{{ user.about_me }}</p>
+               <p class="subtitle">現在時間：{{ current_time }}</p>
+           </div>
+           <div class="button-container">
+               <button class="btn-allow" onclick="window.location.href='{{ url_for('main.index') }}'">
+                   確認完了
+               </button>
+           </div>
+       </div>
+   </div>
+</body>
+</html>

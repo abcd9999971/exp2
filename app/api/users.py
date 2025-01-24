@@ -85,7 +85,7 @@ def update_user(id):
 @token_auth.login_required
 def get_current_user():
     """現在のユーザー情報を取得"""
-    return token_auth.current_user().to_dict()
+    return token_auth.current_user().to_dict(include_email=True)
 
 
 @bp.route('/users/about_me', methods=['PUT'])

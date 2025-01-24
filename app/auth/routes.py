@@ -11,7 +11,7 @@ from app.auth.forms import LoginForm, RegistrationForm, \
     ResetPasswordRequestForm, ResetPasswordForm, DeviceAuthForm
 from app.models import User, DeviceCode, AuthorizationCode
 from app.auth.email import send_password_reset_email
-
+import requests
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -236,26 +236,25 @@ def authorize():
 @bp.route('/oauth_callback')
 def oauth_callback():
     code = request.args.get('code')
-    access_token = request.args.get('access_token')
-
     if code:
         auth_code = AuthorizationCode.query.filter_by(code=code).first()
         if not auth_code:
             return 'Invalid code', 400
-        
-        user = auth_code.user
-        token = user.get_token()
+        token = auth_code.user.get_token()
+        db.session.commit()
+
+        print(token)
+
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.get(url_for('api.get_current_user', _external=True), headers=headers)
+        if response.status_code != 200:
+            return 'API request failed(callback)', 400
+            
+        user_info = response.json()
         
         db.session.delete(auth_code)
         db.session.commit()
         
-        return render_template('oauth_callback.html', user=user)
-    
-    elif access_token:
-        user = User.query.filter_by(token=access_token).first()
-        if not user:
-            return 'Invalid token', 400
+        return render_template('oauth_callback.html', user=user_info,current_time= datetime.utcnow() )
         
-        return render_template('oauth_callback.html', user=user)
-    
     return 'Authorization failed', 400

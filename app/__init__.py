@@ -93,8 +93,8 @@ def create_app(config_class=Config):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Microblog startup')
 
-    from app.auth import bp as oauth_bp  # auth -> oauth に修正
-    app.register_blueprint(oauth_bp, name='oauth')  # url_prefixは不要
+    from app.auth import bp as oauth_bp
+    app.register_blueprint(oauth_bp, name='oauth')
 
     return app
 

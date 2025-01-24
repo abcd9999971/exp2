@@ -1,31 +1,116 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>認証リクエスト</title>
+   <style>
+       body {
+           margin: 0;
+           padding: 0;
+           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+       }
+       
+       .container {
+           background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+           min-height: 100vh;
+           padding: 2rem;
+       }
+       
+       .btn-allow {
+           background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+           color: white;
+           font-size: 1.5rem;
+           padding: 20px 40px;
+           border: none;
+           border-radius: 15px;
+           font-weight: bold;
+           width: 200px;
+           transition: all 0.3s ease;
+           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+           transform: translateY(0);
+           cursor: pointer;
+       }
+       
+       .btn-allow:hover {
+           background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+           transform: translateY(-2px);
+           box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+       }
 
-{% block content %}
-<div class="container">
-   <div class="card bg-gray-50 p-6 rounded-lg shadow">
-       <h2 class="text-2xl font-bold mb-4">認証リクエスト</h2>
-       <div class="mb-4">
-           <p>アプリケーションが以下の権限を要求しています：</p>
-           <ul class="list-disc pl-6">
-               <li>ユーザー名へのアクセス</li>
-               <li>メールアドレスへのアクセス</li>
-               <li>プロフィールへのアクセス</li>
-           </ul>
-       </div>
-       <form method="post">
-           <input type="hidden" name="client_id" value="{{ client_id }}">
-           <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
-           <div class="flex gap-4">
-               <button type="submit" name="allow" value="yes" 
-                       class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                   許可する
-               </button>
-               <button type="submit" name="allow" value="no"
-                       class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-                   拒否する
-               </button>
+       .content-card {
+           background: rgba(255, 255, 255, 0.95);
+           backdrop-filter: blur(10px);
+           border-radius: 1rem;
+           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+           padding: 2rem;
+           max-width: 800px;
+           margin: 0 auto;
+       }
+
+       .title {
+           font-size: 2.5rem;
+           font-weight: bold;
+           margin-bottom: 2rem;
+           color: #111827;
+       }
+
+       .subtitle {
+           font-size: 1.5rem;
+           margin-bottom: 1.5rem;
+           color: #374151;
+       }
+
+       ul {
+           list-style: none;
+           padding: 0;
+           margin-bottom: 2rem;
+       }
+
+       li {
+           position: relative;
+           padding-left: 2rem;
+           font-size: 1.25rem;
+           margin-bottom: 1rem;
+           color: #4B5563;
+       }
+
+       li:before {
+           content: "•";
+           color: #3b82f6;
+           font-size: 1.5em;
+           position: absolute;
+           left: 0;
+           top: -0.2em;
+       }
+
+       .button-container {
+           text-align: center;
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="content-card">
+           <h2 class="title">認証リクエスト</h2>
+           <div>
+               <p class="subtitle">アプリケーションが以下の権限を要求しています：</p>
+               <ul>
+                   <li>ユーザー名へのアクセス</li>
+                   <li>メールアドレスへのアクセス</li>
+                   <li>プロフィールへのアクセス</li>
+               </ul>
            </div>
-       </form>
+           <form method="post">
+               <input type="hidden" name="client_id" value="{{ client_id }}">
+               <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+               <div class="button-container">
+                   <button type="submit" name="allow" value="yes" class="btn-allow">
+                       許可する
+                   </button>
+               </div>
+           </form>
+       </div>
    </div>
-</div>
-{% endblock %}
+</body>
+</html>
